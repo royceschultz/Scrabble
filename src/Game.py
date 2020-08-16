@@ -33,27 +33,30 @@ class Game:
         self.points = DEFAULT_LETTER_POINTS
         self.bag = Bag()
         self.players = [Player(name) for name in players]
-        self.turn = 0
+        self.player_turn = 0
+        self.count_turn = 0
 
         for player in self.players:
             player.fill_rack(self.bag)
+        self.state()
 
     def state(self):
-        print(self.board.toString())
+        print(self.bonuses.toString(overlay=self.board))
         print('Scoreboard:')
         for player in self.players:
             print(player.score, player.name)
         player = self.current_player()
         print('Current Player:', player.name)
-        print('Player Rack:', player.rack)
+        print('Player Rack:', ''.join([letter*player.rack[letter] for letter in player.rack]))
 
 
     def current_player(self):
-        player = self.players[self.turn]
+        player = self.players[self.player_turn]
         return player
 
     def end_turn(self):
-        self.turn = (self.turn + 1) % len(self.players)
+        self.player_turn = (self.player_turn + 1) % len(self.players)
+        self.count_turn += 1
         return self.current_player()
 
     def scan_move(self, start_coord, direction, move):
@@ -96,22 +99,19 @@ class Game:
         return word, score, scanned_coords
 
     def play(self, player, move):
-        self.state()
         # Check it is the players turn
         assert player == self.current_player().name
 
-        # Check player has enough letters
+        # Check player has enough letters for the requested move
         letter_counts = count_unique(move.values())
         for letter in letter_counts:
             assert letter_counts[letter] <= self.current_player().rack.get(letter,0)
 
-        xs = [i[0] for i in move]
-        ys = [i[1] for i in move]
-        # Check played tiles are on the board bounds
-        assert all(x >= 0 for x in xs)
-        assert all(x < self.board_size for x in xs)
-        assert all(y >= 0 for y in ys)
-        assert all(y < self.board_size for y in ys)
+        # Check played tiles are within the board boundry
+        for dim in range(2):
+            xs = [i[dim] for i in move]
+            assert all(x >= 0 for x in xs)
+            assert all(x < self.board_size for x in xs)
 
          # Find words for each played tile
         already_scanned = {'h': {}, 'v':{}}
@@ -129,6 +129,18 @@ class Game:
                     if len(word) > 1:
                         words.append(word)
                         scores.append(score)
+        flag = False
+        for coord in set(already_scanned['h']).union(already_scanned['v']):
+            if self.count_turn == 0:
+                if self.bonuses.get(coord) == 'ctr':
+                    flag = True
+                    break
+            else:
+                if coord in self.board:
+                    flag = True
+                    break
+        # Check the word either includes the center tile or is branched off an existing word
+        assert flag
         print('found',words,'for',scores,'points')
         print(times_scanned)
         # Check word is played in a continuous line
@@ -136,9 +148,11 @@ class Game:
 
         # Check at least 1 word was found
         assert len(words) > 0
+
         # Check each word is a real word
-        for word in words:
-            assert Is_Word(word)
+        # TODO: Re-enable. Temporarily disabled for dev purposes.
+        # for word in words:
+        #     assert Is_Word(word)
 
         # Place tiles on board
         for coord in move:
@@ -154,3 +168,4 @@ class Game:
         self.current_player().score += sum(scores)
         # advance to the next player
         self.end_turn()
+        self.state()

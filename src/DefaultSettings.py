@@ -69,7 +69,7 @@ DEFAULT_BONUSES = {
     (7, 14): 'tw',
     (1,1): 'dw',
     (2,2): 'dw',
-    (7,7): 'center',
+    (7,7): 'ctr',
     # TODO
     # Finish adding bonus locations
 }
