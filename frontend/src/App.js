@@ -1,46 +1,64 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import './App.css'
 
-import { withAuthenticator, AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import Amplify, { Auth, API } from 'aws-amplify';
-import { awsconfig } from './aws-config';
-// Amplify.configure(awsconfig);
-Amplify.configure({
-    Auth: {
-      userPoolId: 'us-west-2_uy6X77g8K',
-      userPoolWebClientId: '3i7g2qdqtcqjcvf57lr5m24ks5',
-      Region: 'us-west-2',
-      // TODO: Consider adding cookie storage param
-    },
-    API: {
-      endpoints: [
-        {
-          name:'pets',
-          endpoints:'5e1yvhtlqk.execute-api.us-west-2.amazonaws.com'
-        },
-      ]
+import Dashboard from './components/Dashboard'
+import Home from './widgets/Home'
+
+import { withAuthenticator, AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react'
+import Amplify, { Auth } from 'aws-amplify'
+import { awsconfig } from './aws-config'
+Amplify.configure(awsconfig)
+
+let callAPI = async (url, params) => {
+    params = (typeof params !== 'undefined') ?  params : {}
+    const user = await Auth.currentAuthenticatedUser();
+    if(user == undefined){
+      console.log('No user logged in');
+      return
     }
-});
+    const token = user.signInUserSession.idToken.jwtToken;
+    // convert object to list -- to enable .map
+    let data = Object.entries(params);
+    // encode every parameter (unpack list into 2 variables)
+    data = data.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+    // combine into string
+    let query = '?' + data.join('&');
+    console.log(query); // => width=1680&height=1050
 
-let callAPI = async (url) => {
-    console.log('here')
-    const user = await Amplify.Auth.currentAuthenticatedUser();
+    let res = await fetch(url+query, {
+      method: 'GET',
+      headers: {
+        Authorization: token
+      },
+    })
+    let json_data = await res.json()
+    return json_data
+}
+
+let postAPI = async (url, data) => {
+    const user = await Auth.currentAuthenticatedUser();
+    if(user == undefined){
+      console.log('No user logged in');
+      return
+    }
     const token = user.signInUserSession.idToken.jwtToken;
 
     console.log(url)
     console.log(token)
 
-    fetch(url, {
-      method: 'GET',
+    let res = await fetch(url, {
+      method: 'POST',
       headers: {
-        Authorization: token
-      }
-    }).then(data => data.json()).then(j => console.log(j))
-
+        Authorization: token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    let json_data = await res.json()
+    return json_data
 }
 
-callAPI('https://5e1yvhtlqk.execute-api.us-west-2.amazonaws.com/beta/pets')
+const api_url = 'https://5o2i6gf458.execute-api.us-west-2.amazonaws.com/prod/'
 
 function App() {
   return (
@@ -51,20 +69,22 @@ function App() {
           <AmplifySignOut />
         </div>
       </AmplifyAuthenticator>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        {['new_game','game'].map((path) => {
+          return (
+            <button onClick={() => callAPI(api_url+path).then(data => {console.log(data)})}>
+              GET: {path}
+            </button>
+          )
+        })}
+        <button onClick={() => postAPI(api_url+'test', {'message': 'test'}).then(data => {console.log(data)})}>
+          Test Post
+        </button>
+      </div>
+      <div>
+        {/* <Dashboard get={callAPI} post={postAPI}/> */}
+        <Home/>
+      </div>
     </div>
   );
 }

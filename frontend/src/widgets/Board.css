@@ -1,0 +1,32 @@
+#board {
+  display: inline-block;
+}
+
+.board_row {
+  background-color: blue;
+  white-space: nowrap;
+}
+
+.board_space {
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  background-color: #ccbb99;
+  vertical-align: bottom;
+  border: 2px solid #333333;
+}
+
+.board_space pre {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tile {
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  background-color: #eeddbb;
+  border: 2px solid #333333;
+  border-radius: 10px;
+}
