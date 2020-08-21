@@ -3,6 +3,8 @@ import React, {useState} from 'react'
 export default function Tile(props){
   const[relX, setRelX] = useState(0)
   const[relY, setRelY] = useState(0)
+  const[lastX, setLastX] = useState(0)
+  const[lastY, setLastY] = useState(0)
 
 
   const getSpacePosition = (x,y) => {
@@ -23,8 +25,8 @@ export default function Tile(props){
     const tileBox = tile.getBoundingClientRect()
     let offX = tileBox.left - boardBox.left + tileBox.width / 2
     let offY = tileBox.top - boardBox.top + tileBox.height / 2
-    if(offX >= 0 && offX < boardBox.width - tileBox.width){
-      if(offY >= 0 && offY < boardBox.height - tileBox.height){
+    if(offX >= 0 && offX < boardBox.width){
+      if(offY >= 0 && offY < boardBox.height){
         return true
       }
     }
@@ -35,30 +37,74 @@ export default function Tile(props){
     const tileBox = tile.getBoundingClientRect()
     const board = document.getElementById('board')
     const boardBox = board.getBoundingClientRect()
+    console.log(tileBox, boardBox)
     let offX = tileBox.left - boardBox.left
     let offY = tileBox.top - boardBox.top
     // offX = Math.floor(props.board_width * offX / boardBox.width)
     // offY = Math.floor(props.board_width * offY / boardBox.height)
     let tileWidth = boardBox.width / props.board_width
+    let tileHeight = boardBox.height / props.board_width
     let coordX = Math.floor((offX + tileBox.width / 2) / tileWidth )
-    let coordY = Math.floor((offY + tileBox.height / 2) / tileWidth)
+    let coordY = Math.floor((offY + tileBox.height / 2) / tileHeight)
+    console.log(coordX, coordY)
+    if(props.is_space_empty){
+      if(props.is_space_empty(coordX + ',' + coordY) == false){
+        console.log('space isnt empty')
+        console.log(coordX + ',' + coordY)
+        setRelX(lastX)
+        setRelY(lastY)
+        return
+      }
+    }
+
+    // Report location back to parent so rack component can construct the move
+    if(props.report_location){
+      props.report_location(coordX+','+coordY)
+    }
 
     let spaceX = coordX * tileWidth
-    let spaceY = coordY * tileWidth
-    setRelX((relX) => relX + (spaceX - offX))
-    setRelY((relY) => relY + (spaceY - offY))
-    console.log(coordX, spaceX, offX);
-    console.log(coordY, spaceY, offY);
+    let spaceY = coordY * tileHeight
+    // Convert absolute coordinates to relative
+
+    setRelX((relX) => {
+      const board = document.getElementById('board')
+      const boardBox = board.getBoundingClientRect()
+      const tileBox = tile.getBoundingClientRect()
+      let offX = tileBox.left - boardBox.left
+      let rel_position = relX + (spaceX - offX)
+      // let rel_position = spaceX
+      setLastX(rel_position)
+      console.log(rel_position, relX, spaceX, offX, (spaceX - offX))
+      return rel_position
+    })
+    // setRelY((relY) => {
+    //   let rel_position = relY + (spaceY - offY)
+    //   setLastY(rel_position)
+    //   console.log(rel_position, relY, spaceY, offY)
+    //   return rel_position
+    // })
+    setRelY((relY) => {
+      const board = document.getElementById('board')
+      const boardBox = board.getBoundingClientRect()
+      const tileBox = tile.getBoundingClientRect()
+      let offY = tileBox.top - boardBox.top
+      let rel_position = relY + (spaceY - offY)
+
+      // let rel_position = spaceY
+      setLastY(rel_position)
+      console.log(rel_position, relY, spaceY, offY, (spaceY - offY))
+      return rel_position
+    })
   }
 
   const startDrag = (event) => {
     if(props.dragable){
+      props.report_location(null)
       const tile = event.target
       const tileBox = tile.getBoundingClientRect()
       let offX = event.pageX - tileBox.left
       let offY = event.pageY - tileBox.top
       let followFunc = followMouse(tileBox.left, tileBox.top, offX, offY)
-      window.addEventListener('mousemove',followFunc)
       const cleanUp = (event) => {
         window.removeEventListener('mousemove',followFunc)
         window.removeEventListener('mouseup',cleanUp)
@@ -71,6 +117,7 @@ export default function Tile(props){
         }
       }
       window.addEventListener('mouseup',cleanUp)
+      window.addEventListener('mousemove',followFunc)
     }
   }
 
@@ -78,7 +125,7 @@ export default function Tile(props){
     position: 'relative',
     left: relX,
     top: relY,
-  }} onMouseDown={startDrag} className='tile'>
+  }} onMouseDown={startDrag} className={'tile' + (props.dragable?' tile-hover':'')}>
     {props.letter}
   </div>
 }

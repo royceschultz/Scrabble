@@ -3,7 +3,6 @@
 }
 
 .board_row {
-  background-color: blue;
   white-space: nowrap;
 }
 
@@ -14,6 +13,7 @@
   background-color: #ccbb99;
   vertical-align: bottom;
   border: 2px solid #333333;
+  cursor: default;
 }
 
 .board_space pre {
@@ -29,4 +29,24 @@
   background-color: #eeddbb;
   border: 2px solid #333333;
   border-radius: 10px;
+  cursor: default;
+}
+
+.tile-hover {
+  cursor: pointer;
+}
+
+.rack-letters {
+  padding: 10px;
+}
+
+.btn {
+  display: inline-block;
+  cursor: pointer;
+  padding: 6px;
+  margin: 10px;
+}
+
+.game-board {
+  background-color: #DDD;
 }

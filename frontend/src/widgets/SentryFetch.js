@@ -38,7 +38,7 @@ export let GET = async (url, params) => {
   return json_data
 }
 
-let POST = async (url, data) => {
+export let POST = async (url, data) => {
     const user = await Auth.currentAuthenticatedUser();
     if(user == undefined){
       console.log('No user logged in');

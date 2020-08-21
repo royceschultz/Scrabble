@@ -7,17 +7,26 @@ export default function Home(){
   // State variables
   const [games, setGames] = useState([])
   const [selectedGame, setSelectedGame] = useState(null)
-  useEffect(() => {
-    GET(API+'game').then(data => {
+  const fetchGames = () => {
+    GET(API+'games').then(data => {
       console.log(data)
       setGames(data.games)
     })
-  }, [])
+  }
+  useEffect(fetchGames, [])
+
+  const callNewGame = (event) => {
+    GET(API+'new_game').then(data => console.log(data))
+    fetchGames()
+  }
   return <div>
     Home
+    <button className='btn' onClick={callNewGame}>
+      New Game
+    </button>
     <div>
       {games.map(game => <span>
-        <button onClick={() => setSelectedGame(game)}>
+        <button className='btn' onClick={() => setSelectedGame(game)}>
           {game.players.map((player) => <div>
             {player.score} : {player.name}
           </div>)}
@@ -29,7 +38,7 @@ export default function Home(){
     </div>
     <div>
       {selectedGame
-        ? <GameBoard gameId={selectedGame.id} />
+        ? <GameBoard {...selectedGame} />
         : null
       }
     </div>
