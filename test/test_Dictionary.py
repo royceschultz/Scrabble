@@ -1,8 +1,8 @@
 def test_Dictionary_is_importable():
     import Scrabble.src.Dictionary
 
-def test_Is_Word():
-    from Scrabble.src.Dictionary import Is_Word
-    assert Is_Word('test')
-    assert Is_Word('hello')
-    assert not Is_Word('qwer')
+def test_is_word():
+    from Scrabble.src.Dictionary import is_word
+    assert is_word('test')
+    assert is_word('hello')
+    assert not is_word('qwer')
