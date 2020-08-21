@@ -5,14 +5,18 @@ from Dictionary import is_word
 '''
 Bag Functions
 '''
+
+
 def count_unique(values):
     unique_values = {}
     for value in values:
         add_to_bag(value, unique_values)
     return unique_values
 
+
 def num_tiles(bag):
     return sum(bag.values())
+
 
 def add_to_bag(letter, bag):
     if letter in bag:
@@ -21,10 +25,12 @@ def add_to_bag(letter, bag):
         bag[letter] = 1
     return
 
+
 def remove_from_bag(letter, bag):
     assert letter in bag
     bag[letter] -= 1
     assert bag[letter] >= 0
+
 
 def draw_from_bag(bag):
     if num_tiles(bag) == 0:
@@ -47,9 +53,11 @@ def fill_player_rack(player, bag, full_rack_len=7):
         add_to_bag(letter, player['rack'])
     return
 
+
 '''
 Game Functions
 '''
+
 
 def new_game(players=['P1', 'P2']):
     game = {
@@ -58,7 +66,10 @@ def new_game(players=['P1', 'P2']):
         'bonus_tiles': DEFAULT_BONUSES.copy(),
         'letter_values': DEFAULT_LETTER_POINTS.copy(),
         'bag': DEFAULT_BAG_DIST.copy(),
-        'players': [{'name': player, 'rack': {}, 'score': 0} for player in players],
+        'players': [{'name': player,
+                     'rack': {},
+                     'score': 0
+                     } for player in players],
         'turn_number': 0
     }
     for player in game['players']:
@@ -73,6 +84,7 @@ def end_turn(game):
     return
 
 def parse_bonus(bonus):
+    # TODO: Use switch statement
     if bonus == None: return (1,1)
     if bonus == 'dl': return (2,1)
     if bonus == 'tl': return (3,1)
@@ -81,8 +93,8 @@ def parse_bonus(bonus):
     return (1,1)
 
 def scan_move(game, start_coord, direction, move):
-    x,y = start_coord
-    dx, dy = {'h':[1,0],'v':[0,1]}[direction]
+    x,y = start_coord.split(',')
+    dx, dy = {'h': [1, 0], 'v': [0, 1]}[direction]
     # Given the direction, go to the first letter of the word
     while (x-dx, y-dy) in move or (x-dx, y-dy) in game['played_tiles']:
         x -= dx
@@ -94,7 +106,7 @@ def scan_move(game, start_coord, direction, move):
     # TODO: Remove. Saving bonus scales for logging purposes only.
     bonuses = {}
     # Now read through the word in order
-    p = (x,y)
+    p = ','.join([x, y])
     while p in move or p in game['played_tiles']:
         # Check tile is not already filled
         assert not (p in move and p in game['played_tiles'])
@@ -113,13 +125,14 @@ def scan_move(game, start_coord, direction, move):
             total_word_scale *= word_scale
         scanned_coords.append(p)
         # Move to the next letter
-        x,y = p
+        x, y = p.split(',')
         x += dx
         y += dy
-        p = (x,y)
+        p = ','.join([x, y])
     score *= total_word_scale
     print(f'found {word} for {score} points with bonuses: {bonuses}')
     return word, score, scanned_coords
+
 
 def play(game, player, move):
     # Check it is the players turn
@@ -128,7 +141,7 @@ def play(game, player, move):
     # Check player has enough letters for the requested move
     letter_counts = count_unique(move.values())
     for letter in letter_counts:
-        assert letter_counts[letter] <= get_current_player(game)['rack'].get(letter,0)
+        assert letter_counts[letter] <= get_current_player(game)['rack'].get(letter, 0)
 
     # Check played tiles are within the board boundry
     for dim in range(2):
@@ -169,7 +182,7 @@ def play(game, player, move):
                 break
     # Check the word either includes the center tile or is branched off an existing word
     assert flag
-    print('found',words,'for',scores,'points')
+    print('found', words, 'for', scores, 'points')
     # Check at least 1 word was found
     assert len(words) > 0
     # Check each word is a real word
