@@ -1,10 +1,18 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 export default function Tile(props){
   const[relX, setRelX] = useState(0)
   const[relY, setRelY] = useState(0)
   const[lastX, setLastX] = useState(0)
   const[lastY, setLastY] = useState(0)
+
+  useEffect(() => {
+    setRelX(0)
+    setRelY(0)
+    if(props.report_location){
+      props.report_location(null)
+    }
+  }, [props.game_id])
 
 
   const getSpacePosition = (x,y) => {

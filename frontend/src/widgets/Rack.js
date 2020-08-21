@@ -45,6 +45,7 @@ export default function Rack(props){
               board_width={15}
               report_location={reportLocation(i)}
               is_space_empty={isSpaceEmpty}
+              game_id={props.id}
             />)}
     </div>
     <button className='btn' onClick={handleSubmit}>

@@ -18,18 +18,22 @@ const searchInOrder = (key, objects, def) => {
 
 export default function Board(props){
   const range = [...Array(props.board_size).keys()]
+
+
+
   return <div id='board'>
     {range.map((i) => <div className='board_row'>
       {range.map((j) => {
         let position = i + ',' + j
-        return ((position in props.played_tiles)
-            ? <Tile letter={props.played_tiles[position]} draggable={false} />
-            : <div className='board_space'>
-              {position in props.bonus_tiles
-                ? props.bonus_tiles[position]
-                : ' '}
-            </div>)
-
+        const bonus = (position in props.bonus_tiles
+                        ? props.bonus_tiles[position]
+                        : '')
+        return <div className={'board_space ' + (bonus?'bonus-'+bonus:'')}>
+          {(position in props.played_tiles)
+              ? <Tile letter={props.played_tiles[position]} draggable={false} />
+              : bonus
+          }
+        </div>
       })}
     </div>)}
   </div>

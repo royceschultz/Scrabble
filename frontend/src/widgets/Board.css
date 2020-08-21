@@ -22,6 +22,22 @@
   align-items: center;
 }
 
+.bonus-dl {
+  background-color: #4466BB;
+}
+
+.bonus-dw {
+  background-color: #DD9999;
+}
+
+.bonus-tl {
+  background-color: #3333BB;
+}
+
+.bonus-tw {
+  background-color: #DD5555;
+}
+
 .tile {
   display: inline-block;
   height: 50px;
