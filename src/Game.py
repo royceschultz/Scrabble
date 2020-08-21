@@ -1,6 +1,7 @@
-from DefaultSettings import DEFAULT_BONUSES, DEFAULT_LETTER_POINTS, DEFAULT_BAG_DIST
+from .DefaultSettings import DEFAULT_BONUSES, DEFAULT_LETTER_POINTS, DEFAULT_BAG_DIST
+from .Dictionary import is_word
 import random
-from Dictionary import is_word
+
 
 '''
 Bag Functions
@@ -59,6 +60,14 @@ Game Functions
 '''
 
 
+def coord_to_string(x,y):
+    return ','.join([str(x), str(y)])
+
+
+def string_to_coord(location):
+    return [int(x) for x in locaiton.split(',')]
+
+
 def new_game(players=['P1', 'P2']):
     game = {
         'board_size': 15,
@@ -94,9 +103,10 @@ def parse_bonus(bonus):
 
 def scan_move(game, start_coord, direction, move):
     x,y = start_coord.split(',')
+    x,y = int(x), int(y)
     dx, dy = {'h': [1, 0], 'v': [0, 1]}[direction]
     # Given the direction, go to the first letter of the word
-    while (x-dx, y-dy) in move or (x-dx, y-dy) in game['played_tiles']:
+    while coord_to_string(x-dx, y-dy) in move or coord_to_string(x-dx, y-dy) in game['played_tiles']:
         x -= dx
         y -= dy
     word = ''
@@ -106,7 +116,7 @@ def scan_move(game, start_coord, direction, move):
     # TODO: Remove. Saving bonus scales for logging purposes only.
     bonuses = {}
     # Now read through the word in order
-    p = ','.join([x, y])
+    p = ','.join([str(x), str(y)])
     while p in move or p in game['played_tiles']:
         # Check tile is not already filled
         assert not (p in move and p in game['played_tiles'])
@@ -126,9 +136,10 @@ def scan_move(game, start_coord, direction, move):
         scanned_coords.append(p)
         # Move to the next letter
         x, y = p.split(',')
+        x,y = int(x), int(y)
         x += dx
         y += dy
-        p = ','.join([x, y])
+        p = ','.join([str(x), str(y)])
     score *= total_word_scale
     print(f'found {word} for {score} points with bonuses: {bonuses}')
     return word, score, scanned_coords
@@ -145,7 +156,7 @@ def play(game, player, move):
 
     # Check played tiles are within the board boundry
     for dim in range(2):
-        xs = [i[dim] for i in move]
+        xs = [int(i.split(',')[dim]) for i in move]
         assert all(x >= 0 for x in xs)
         assert all(x < game['board_size'] for x in xs)
 
@@ -171,6 +182,7 @@ def play(game, player, move):
     # Check the word either includes the center tile or is branched off an existing word
     # TODO: Integrate into the loop above
     flag = False
+    print(set(already_scanned['h']).union(already_scanned['v']))
     for coord in set(already_scanned['h']).union(already_scanned['v']):
         if game['turn_number'] == 0:
             if game['bonus_tiles'].get(coord) == 'ctr':
