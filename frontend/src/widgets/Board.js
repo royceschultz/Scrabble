@@ -24,7 +24,7 @@ export default function Board(props){
   return <div id='board'>
     {range.map((i) => <div className='board_row'>
       {range.map((j) => {
-        let position = i + ',' + j
+        let position = j + ',' + i
         const bonus = (position in props.bonus_tiles
                         ? props.bonus_tiles[position]
                         : '')

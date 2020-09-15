@@ -16,8 +16,10 @@ export default function Home(){
   useEffect(fetchGames, [])
 
   const callNewGame = (event) => {
-    GET(API+'new_game').then(data => console.log(data))
-    fetchGames()
+    GET(API+'new_game').then(data => {
+      console.log(data)
+      fetchGames()
+    })
   }
   return <div>
     Home
